@@ -1,7 +1,9 @@
 from core.config.data import configs
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 import os
+from typing import Annotated
+from fastapi import Depends
 
 
 Base = declarative_base()
@@ -37,9 +39,18 @@ match configs.db_connection:
         raise ValueError("Database connection failed")
 
 
-async_session = AsyncSession(engine, expire_on_commit=False)
+async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def init_database():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # async with engine.begin() as conn:
+    #     await conn.run_sync(Base.metadata.create_all)
+    pass
+
+
+async def async_connection():
+    async with async_session() as session:
+        yield session
+
+
+db_session = Annotated[AsyncSession, Depends(async_connection)]
