@@ -30,7 +30,8 @@ match configs.db_connection:
         engine = create_async_engine(db_uri)
     
     case "mysql":
-        pass
+        db_uri = f'mysql+aiomysql://{configs.db_username}:{configs.db_password}@{configs.db_host}:{configs.db_port}/{configs.db_name}'
+        engine = create_async_engine(db_uri)
 
     case _:
         raise ValueError("Database connection failed")
