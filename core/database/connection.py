@@ -43,9 +43,8 @@ async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def init_database():
-    # async with engine.begin() as conn:
-    #     await conn.run_sync(Base.metadata.create_all)
-    pass
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 
 async def async_connection():
