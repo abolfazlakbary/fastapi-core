@@ -1,6 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Security, Depends
 from core.database.connection import db_session
 from .controller import UserController
+from core.authenticate.auth import register
+from typing import Annotated
 
 
 controller = UserController()
@@ -28,3 +30,14 @@ async def get_user_by_id(
     return data
 
 
+
+@user_router.post(
+    "/register"
+)
+async def register_new_user(
+    db: db_session,
+    username: str,
+    password: str
+):
+    new_user = await register(db, username, password)
+    return new_user

@@ -17,6 +17,9 @@ class AppData:
     redis_host = str(os.getenv("REDIS_HOST"))
     redis_port = int(os.getenv("REDIS_PORT"))
     redis_db_number = int(os.getenv("REDIS_DB_NUMBER"))
+    secret_key = str(os.getenv("SECRET_KEY"))
+    hashing_algorithm = str(os.getenv("ALGORITHM"))
+    access_token_expire_minutes = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 
 configs = AppData()
