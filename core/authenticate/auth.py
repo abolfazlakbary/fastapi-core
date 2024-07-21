@@ -1,4 +1,4 @@
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, or_
 from database.models import User
 from core.authenticate.algorithms import hash_password
 from core.database.connection import AsyncSession
@@ -6,18 +6,29 @@ from core.exceptions.exc import AuthFailedException, BadRequestException, Procce
 
 
 
-async def register(db: AsyncSession, username: str, password: str):
+async def register(db: AsyncSession, form_data):
+    request_data = form_data.model_dump(exclude=["password"])
     stmt = (
         select(User)
-        .where(User.username == username)
+        .where(
+            or_(
+                User.email == request_data.get("email"),
+                User.username == request_data.get("username")
+            )
+        )
     )
     old_user = (await db.execute(stmt)).scalars().first()
     if old_user:
-        raise BadRequestException("User with this username already exist")
+        raise BadRequestException("User with this data already exist")
     
     i_stmt = (
         insert(User)
-        .values({"username": username, "hashed_password": hash_password(password)})
+        .values(
+            {
+                **request_data,
+                "hashed_password": hash_password(form_data.password)
+            }
+        )
         .returning(User)
     )
     new_user = (await db.execute(i_stmt)).scalars().first()

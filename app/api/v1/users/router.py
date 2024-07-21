@@ -3,6 +3,7 @@ from core.database.connection import db_session
 from .controller import UserController
 from core.authenticate.auth import register
 from typing import Annotated
+from .schema.request import UserRegisterSchema
 
 
 controller = UserController()
@@ -36,8 +37,7 @@ async def get_user_by_id(
 )
 async def register_new_user(
     db: db_session,
-    username: str,
-    password: str
+    form_data: UserRegisterSchema
 ):
-    new_user = await register(db, username, password)
+    new_user = await register(db, form_data)
     return new_user
