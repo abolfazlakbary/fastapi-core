@@ -21,11 +21,13 @@ class AuthFailedException(CustomException):
 class BadRequestException(CustomException):
     message = "Request failed"
     status_code = status.HTTP_400_BAD_REQUEST
-    def __init__(self, message=None, status_code=None):
+    def __init__(self, message=None, status_code=None, errors=None):
         if message:
             self.message = message
         if status_code:
             self.status_code = status_code
+        if errors:
+            self.errors = errors
 
 
 class ProccessFailedException(CustomException):

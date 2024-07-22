@@ -7,6 +7,7 @@ from core.authenticate.schema.response import CurrentUserResponseShema
 from core.redis.commands import add_token_to_blacklist
 from core.exceptions.exc import AuthFailedException
 from core.schema.response import SuccessResponse
+from core.schema.validate import Validate
 
 
 
@@ -22,6 +23,7 @@ async def register_new_user(
     db: db_session,
     form_data: UserRegisterSchema
 ):
+    await Validate().validate(db, form_data)
     new_user = await register(db, form_data)
     return SuccessResponse.show(data=new_user)
 
