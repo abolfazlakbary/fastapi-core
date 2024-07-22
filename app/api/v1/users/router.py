@@ -6,6 +6,7 @@ from .schema.request import UserRegisterSchema, UserLoginSchema
 from core.authenticate.schema.response import CurrentUserResponseShema
 from core.redis.commands import add_token_to_blacklist
 from core.exceptions.exc import AuthFailedException
+from core.schema.response import SuccessResponse
 
 
 
@@ -14,14 +15,15 @@ user_router = APIRouter(tags=["Users"], prefix="/users")
 
 
 @user_router.post(
-    "/register"
+    "/register",
+    response_model=SuccessResponse[CurrentUserResponseShema]
 )
 async def register_new_user(
     db: db_session,
     form_data: UserRegisterSchema
 ):
     new_user = await register(db, form_data)
-    return new_user
+    return SuccessResponse.show(data=new_user)
 
 
 @user_router.post("/login")
@@ -29,17 +31,19 @@ async def login_for_access_token(
     db: db_session,
     form_data: UserLoginSchema
 ):
-    data = await login_user(db, form_data.username, form_data.password)
-    return data
+    token = await login_user(db, form_data.username, form_data.password)
+    data = {"token": token}
+    return SuccessResponse.show(data=data)
 
 
 
 @user_router.get(
     "/me",
-    response_model=CurrentUserResponseShema
+    response_model=SuccessResponse[CurrentUserResponseShema]
 )
 async def get_personal_info(current_user = Security(check_authentication)):
-    return current_user.get("data")
+    this_user = current_user.get("data")
+    return SuccessResponse.show(data=this_user)
 
 
 
@@ -49,4 +53,5 @@ async def user_logout(current_user = Security(check_authentication)):
     if not token:
         raise AuthFailedException("You are not logged in")
     await add_token_to_blacklist(token)
-    return {"message": "successfully logged out"}
+    logout_message = {"info": "successfully logged out"}
+    return SuccessResponse.show(data=logout_message)
