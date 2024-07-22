@@ -7,3 +7,8 @@ class UserRegisterSchema(BaseModel):
     email: str
     first_name: str | None = None
     last_name: str | None = None
+
+
+class UserLoginSchema(BaseModel):
+    username: str
+    password: str

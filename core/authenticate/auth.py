@@ -1,12 +1,27 @@
 from sqlalchemy import select, insert, or_
 from database.models import User
 from core.authenticate.algorithms import hash_password, create_access_token
-from core.database.connection import AsyncSession
-from core.exceptions.exc import AuthFailedException, BadRequestException, ProccessFailedException
+from core.database.connection import AsyncSession, db_session
+from core.exceptions.exc import AuthFailedException, BadRequestException, ProccessFailedException, NotFoundException
 from datetime import timedelta
 from core.config.data import configs
 from core.authenticate.settings import pwd_context
+import jwt
+from jwt import PyJWTError
+from fastapi import Depends, Security
+from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCredentials
 
+
+
+async def get_user_by_username(db: AsyncSession, username: str):
+    stmt = (
+        select(User)
+        .where(User.username == username)
+    )
+    this_user = (await db.execute(stmt)).scalars().first()
+    if not this_user:
+        raise NotFoundException("User not found")
+    return this_user
 
 
 async def register(db: AsyncSession, form_data):
@@ -64,3 +79,34 @@ async def login_user(db: AsyncSession,username: str, password: str):
     
     return access_token
 
+
+def decode_jwt_token(token: str):
+    try:
+        payload = jwt.decode(token, configs.secret_key, algorithms=[configs.hashing_algorithm])
+        return payload
+    except PyJWTError:
+        raise AuthFailedException()
+
+
+async def check_authentication(
+    security_scopes: SecurityScopes,
+    db: db_session,
+    credentials: HTTPAuthorizationCredentials = Depends(
+        HTTPBearer(auto_error=False)
+    )
+):
+    
+    if credentials is None:
+        raise AuthFailedException("You are not logged in")
+    decoded_token = decode_jwt_token(credentials.credentials)
+    req_username = decoded_token["sub"]["username"]
+    req_user = await get_user_by_username(db, req_username)
+    
+    return {
+        "data": req_user,
+        "exp": decoded_token["exp"],
+        "security_scopes": security_scopes.scopes
+    }
+
+
+token_data = Security(check_authentication, scopes=["Ali"])
