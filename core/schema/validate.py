@@ -1,6 +1,6 @@
 from core.database.connection import AsyncSession
 from core.exceptions.exc import BadRequestException
-
+import re
 
 
 class Validate:
@@ -15,8 +15,12 @@ class Validate:
             
         if errors != {}:
             raise BadRequestException(errors=errors)
-        
 
+
+
+def check_email_is_valid(input: str) -> bool:
+    email_pattern = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    return email_pattern.match(input)
 
 
 def error_handler(error_message: str, fied_name: str, errors):
