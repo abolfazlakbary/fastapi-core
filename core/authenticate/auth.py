@@ -1,8 +1,11 @@
 from sqlalchemy import select, insert, or_
 from database.models import User
-from core.authenticate.algorithms import hash_password
+from core.authenticate.algorithms import hash_password, create_access_token
 from core.database.connection import AsyncSession
 from core.exceptions.exc import AuthFailedException, BadRequestException, ProccessFailedException
+from datetime import timedelta
+from core.config.data import configs
+from core.authenticate.settings import pwd_context
 
 
 
@@ -20,7 +23,6 @@ async def register(db: AsyncSession, form_data):
     old_user = (await db.execute(stmt)).scalars().first()
     if old_user:
         raise BadRequestException("User with this data already exist")
-    
     i_stmt = (
         insert(User)
         .values(
@@ -45,10 +47,20 @@ async def login_user(db: AsyncSession,username: str, password: str):
     stmt = (
         select(User)
         .where(User.username == username)
-        .where(User.hashed_password == hash_password(password))
     )
     this_user = (await db.execute(stmt)).scalars().first()
-    if not this_user:
+    if not this_user or not pwd_context.verify(password, this_user.hashed_password):
         raise AuthFailedException()
-    return this_user
+    
+    access_token_expires = timedelta(minutes=configs.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={
+            "sub": {
+                "username": username
+            }
+        },
+        expires_delta=access_token_expires
+    )
+    
+    return access_token
 

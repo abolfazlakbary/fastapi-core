@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Security, Depends
 from core.database.connection import db_session
 from .controller import UserController
-from core.authenticate.auth import register
+from core.authenticate.auth import register, login_user
 from typing import Annotated
 from .schema.request import UserRegisterSchema
+from core.authenticate.settings import OAuth2PasswordRequestForm
 
 
 controller = UserController()
@@ -41,3 +42,12 @@ async def register_new_user(
 ):
     new_user = await register(db, form_data)
     return new_user
+
+
+@user_router.post("/login")
+async def login_for_access_token(
+    db: db_session,
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+):
+    data = await login_user(db, form_data.username, form_data.password)
+    return data
