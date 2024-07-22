@@ -4,6 +4,9 @@ from .controller import UserController
 from core.authenticate.auth import register, login_user, check_authentication
 from .schema.request import UserRegisterSchema, UserLoginSchema
 from core.authenticate.schema.response import CurrentUserResponseShema
+from core.redis.commands import add_token_to_blacklist
+from core.exceptions.exc import AuthFailedException
+
 
 
 controller = UserController()
@@ -37,3 +40,13 @@ async def login_for_access_token(
 )
 async def get_personal_info(current_user = Security(check_authentication)):
     return current_user.get("data")
+
+
+
+@user_router.get("/logout")
+async def user_logout(current_user = Security(check_authentication)):
+    token = current_user.get("token")
+    if not token:
+        raise AuthFailedException("You are not logged in")
+    await add_token_to_blacklist(token)
+    return {"message": "successfully logged out"}

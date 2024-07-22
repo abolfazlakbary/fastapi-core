@@ -8,9 +8,9 @@ from core.config.data import configs
 from core.authenticate.settings import pwd_context
 import jwt
 from jwt import PyJWTError
-from fastapi import Depends, Security
+from fastapi import Depends
 from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCredentials
-
+from core.redis.commands import check_token_is_in_blacklist
 
 
 
@@ -98,12 +98,17 @@ async def check_authentication(
 ):
     if credentials is None:
         raise AuthFailedException("You are not logged in")
+    
+    if await check_token_is_in_blacklist(credentials.credentials):
+        raise AuthFailedException("You are not logged in")
+
     decoded_token = decode_jwt_token(credentials.credentials)
     req_username = decoded_token["sub"]["username"]
     req_user = await get_user_by_username(db, req_username)
     
     return {
         "data": req_user,
+        "token": credentials.credentials,
         "exp": decoded_token["exp"],
         "security_scopes": security_scopes.scopes
     }
