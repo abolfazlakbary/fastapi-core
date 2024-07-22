@@ -11,7 +11,7 @@ from core.exceptions.base import CustomException
 @app.exception_handler(CustomException)
 async def my_exception_handler(request: Request, exc: CustomException):
     return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND, 
+        status_code=exc.status_code, 
         content={
             "message": exc.message,
             "code": exc.status_code,

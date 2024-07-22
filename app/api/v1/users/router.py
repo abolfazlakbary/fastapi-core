@@ -1,7 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 from core.database.connection import db_session
 from .controller import UserController
-from core.authenticate.auth import register, login_user, token_data
+from core.authenticate.auth import register, login_user, check_authentication
 from .schema.request import UserRegisterSchema, UserLoginSchema
 from core.authenticate.schema.response import CurrentUserResponseShema
 
@@ -35,5 +35,5 @@ async def login_for_access_token(
     "/me",
     response_model=CurrentUserResponseShema
 )
-async def get_personal_info(current_user = token_data):
+async def get_personal_info(current_user = Security(check_authentication)):
     return current_user.get("data")

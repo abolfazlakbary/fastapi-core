@@ -13,6 +13,7 @@ from fastapi.security import SecurityScopes, HTTPBearer, HTTPAuthorizationCreden
 
 
 
+
 async def get_user_by_username(db: AsyncSession, username: str):
     stmt = (
         select(User)
@@ -85,7 +86,7 @@ def decode_jwt_token(token: str):
         payload = jwt.decode(token, configs.secret_key, algorithms=[configs.hashing_algorithm])
         return payload
     except PyJWTError:
-        raise AuthFailedException()
+        raise AuthFailedException("Token is invalid or expired")
 
 
 async def check_authentication(
@@ -95,7 +96,6 @@ async def check_authentication(
         HTTPBearer(auto_error=False)
     )
 ):
-    
     if credentials is None:
         raise AuthFailedException("You are not logged in")
     decoded_token = decode_jwt_token(credentials.credentials)
@@ -109,4 +109,3 @@ async def check_authentication(
     }
 
 
-token_data = Security(check_authentication, scopes=["Ali"])
