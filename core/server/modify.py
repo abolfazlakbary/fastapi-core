@@ -2,9 +2,12 @@ from app.fastapi_app import app
 from core.database.connection import init_database
 from database import models
 from core.redis.connection import redis_connection
-from fastapi import Request, status
+from fastapi import Request
 from fastapi.responses import JSONResponse
 from core.exceptions.base import CustomException
+from core.schema.validate import transform_pydantic_errors
+from fastapi.exceptions import RequestValidationError
+
 
 
 
@@ -17,6 +20,14 @@ async def my_exception_handler(request: Request, exc: CustomException):
             "code": exc.status_code,
             "errors": exc.errors
         }
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    transformed_errors = transform_pydantic_errors(exc.errors())
+    return JSONResponse(
+        status_code=400,
+        content=transformed_errors,
     )
 
 

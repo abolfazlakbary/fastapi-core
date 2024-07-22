@@ -1,6 +1,7 @@
 from core.database.connection import AsyncSession
 from core.exceptions.exc import BadRequestException
 import re
+from fastapi import status
 
 
 class Validate:
@@ -28,3 +29,15 @@ def error_handler(error_message: str, fied_name: str, errors):
         errors[fied_name].append(error_message)
     else:
         errors[fied_name] = [error_message]
+
+
+def transform_pydantic_errors(errors):
+    transformed_errors = {}
+    for error in errors:
+        field_name = error['loc'][-1]
+        transformed_errors[field_name] = error['msg']
+    return {
+        "errors": transformed_errors,
+        "message": "Request failed",
+        "code": status.HTTP_400_BAD_REQUEST
+    }
