@@ -20,6 +20,7 @@ class AppData:
     secret_key = str(os.getenv("SECRET_KEY"))
     hashing_algorithm = str(os.getenv("ALGORITHM"))
     access_token_expire_minutes = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+    celery_broker_type = str(os.getenv("CELERY_BROKER_TYPE"))
 
 
 configs = AppData()
