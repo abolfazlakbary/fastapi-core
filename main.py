@@ -4,12 +4,17 @@ from core.config.data import configs
 import asyncio
 
 
-if __name__ == "__main__":
-    asyncio.run(
-        run_server(),
-        uvicorn.run(
+async def main():
+    await run_server()
+    config = uvicorn.Config(
         app=app,
         host=configs.app_host,
         port=configs.app_port
-     )
     )
+    server = uvicorn.Server(config)
+    await server.serve()
+    
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -1,0 +1,1 @@
+from celery_manager.tasks.remove_old_tokens import remove_data
