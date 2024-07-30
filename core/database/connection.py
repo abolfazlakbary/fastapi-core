@@ -29,11 +29,11 @@ match configs.db_connection:
     
     case "postgres":
         db_uri = f'postgresql+asyncpg://{configs.db_username}:{configs.db_password}@{configs.db_host}:{configs.db_port}/{configs.db_name}'
-        engine = create_async_engine(db_uri)
+        engine = create_async_engine(db_uri, pool_size=configs.db_pool_size, max_overflow=configs.db_max_overflow)
     
     case "mysql":
         db_uri = f'mysql+aiomysql://{configs.db_username}:{configs.db_password}@{configs.db_host}:{configs.db_port}/{configs.db_name}'
-        engine = create_async_engine(db_uri)
+        engine = create_async_engine(db_uri, pool_size=configs.db_pool_size, max_overflow=configs.db_max_overflow)
 
     case _:
         raise ValueError("Database connection failed")

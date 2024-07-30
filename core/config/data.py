@@ -14,6 +14,8 @@ class AppData:
     db_password = str(os.getenv("DB_PASSWORD"))
     db_host = str(os.getenv("DB_HOST"))
     db_port = str(os.getenv("DB_PORT"))
+    db_pool_size = int(os.getenv("DB_POOL_SIZE"))
+    db_max_overflow = int(os.getenv("DB_MAX_OVERFLOW"))
     redis_host = str(os.getenv("REDIS_HOST"))
     redis_port = int(os.getenv("REDIS_PORT"))
     redis_db_number = int(os.getenv("REDIS_DB_NUMBER"))
