@@ -1,6 +1,7 @@
 from celery import Celery
 from core.config.data import configs
 
+
 match configs.celery_broker_type:
     case "redis":
         celery_app = Celery(
@@ -15,11 +16,12 @@ match configs.celery_broker_type:
 celery_app.conf.beat_schedule = {
     'remove-data-daily': {
         'task': 'remove-data',
-        'schedule': 5.0, # Every 5 seconds
+        'schedule': 86400.0, # Daily
         'args': ()
     },
 }
 
+celery_app.conf.broker_connection_retry_on_startup = True
 celery_app.conf.timezone = 'Asia/Tehran'
 
 
