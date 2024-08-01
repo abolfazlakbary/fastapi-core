@@ -21,10 +21,3 @@ Including :
 9 - async structure in order to have better performance
 
 10 - Simple authentication based on JWT and capable of modification
-
-
-
-How to run celery:
-
-1: celery -A celery_manager.celery_app worker --loglevel=info
-2: celery -A celery_manager.celery_app beat --loglevel=info
