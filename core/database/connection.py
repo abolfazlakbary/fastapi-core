@@ -47,6 +47,11 @@ async def init_database():
         await conn.run_sync(Base.metadata.create_all)
 
 
+async def drop_database():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+
 async def async_connection():
     async with async_session() as session:
         yield session
