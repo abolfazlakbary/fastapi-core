@@ -1,7 +1,7 @@
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from core.database.connection import db_uri
-
+import asyncio
 
 @pytest_asyncio.fixture()
 async def db():
