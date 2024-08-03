@@ -21,3 +21,5 @@ Including :
 9 - async structure in order to have better performance
 
 10 - Simple authentication based on JWT and capable of modification
+
+11 - test for connection of different applications
